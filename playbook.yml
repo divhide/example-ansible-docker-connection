@@ -1,0 +1,42 @@
+---
+
+# run an empty centos 7 container
+- hosts: docker-host
+
+  vars:
+    # workaround error "docker-py is needed for this module"
+    ansible_python_interpreter: "/usr/bin/env python"
+
+  tasks:
+
+    - name: build docker image
+      docker:
+        image: "centos:7"
+        name: "divhide-test"
+        state: "reloaded"
+        docker_url: "{{ docker_host_url }}"
+        use_tls: "encrypt"
+        command: sleep 5m
+      environment:
+        DOCKER_CERT_PATH: "{{ docker_host_cert_path }}"
+      # register the running container
+      register: docker_result
+
+    - name: add new docker connection {{ docker_result.ansible_facts.docker_containers[0].Config.Hostname }} to docker-container inventory group
+      add_host:
+        name: "{{ docker_result.ansible_facts.docker_containers[0].Config.Hostname }}"
+        groups: "docker-container"
+        ansible_connection: docker
+        ansible_ssh_user: "root"
+        ansible_become_user: "root"
+        ansible_become: "yes"
+
+
+# setup the new machine using ansible instead of docker
+- hosts: docker-container
+  tasks:
+
+    - name: install vi
+      yum:
+        name: vi
+        state: present
