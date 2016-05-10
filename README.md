@@ -23,6 +23,8 @@ docker exec -it XXXXXXX bash
 
 ```
 
+You can read more about it on [this](http://divhide.com/2016/05/10/creating-an-ansible-docker-connection-with-docker-machine/) blog post.
+
 # Author
 
 Oscar Brito
